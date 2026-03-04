@@ -1,47 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Happy Birthday, Mr. Fairil!</title>
+    <title>Happy Birthday! - 2026</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
-    <div class="container">
-        <h1>Click the Card for a Surprise!</h1>
-        <div class="card-wrapper">
-            <div class="card" id="card">
-                <div class="card-front">
-                    <h2>Happy Birthday, Mr. Fairil!</h2>
-                    <p>Best Biology Teacher Ever!</p>
-                    <div class="cell-animation">🦠</div>
-                </div>
-                <div class="card-back">
-                    <h2>From: <br> Lim Guan You</h2>
-                    <p>Thanks for teaching us about cells, DNA, and all things alive! Have an amazing day!</p>
-                    <div class="dna-strand">🧬</div>
+    <!-- Background Music -->
+    <audio id="bg-audio" src="hbs.mp3" loop preload="auto" controlsList="nodownload" style="display: none;"
+        oncontextmenu="return false;"></audio>
+
+    <!-- Liquid Background Elements -->
+    <div class="liquid-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+        <div class="blob blob-4"></div>
+    </div>
+
+    <!-- Optional Canvas for extra interactive particles if needed, but keeping it minimal for Apple style -->
+    <canvas id="bio-canvas"></canvas>
+
+    <main class="card-container">
+        <div class="glass-card" id="main-card">
+            <!-- Glassmorphism Reflection -->
+            <div class="glass-reflection"></div>
+
+            <div class="bio-icon-container">
+                <div class="bio-icon">🧬</div>
+            </div>
+
+            <h1 class="title">Happy Birthday,<br><span class="highlight" style="font-size: 0.8em; line-height: 1.4;">Mr
+                    Fairil MD Samudi</span></h1>
+            <h2 class="subtitle">To an Incredible Biology Teacher</h2>
+
+            <div class="content-body">
+                <p class="message">
+                    Just as DNA is the blueprint of life, your teachings are the blueprint of my curiosity. May your
+                    birthday be filled with endless energy (straight from the mitochondria) and exponential joy.
+                </p>
+                <p class="message secondary-text">
+                    Thank you for making science fascinating and for inspiring me every single day.
+                </p>
+                <div style="margin-top: 32px; font-weight: 500; color: #fff; letter-spacing: 0.05em;">
+                    <span style="color: var(--text-secondary); font-size: 0.9em; text-transform: uppercase;">From your
+                        student,</span><br>
+                    <span style="font-size: 1.2em; display: inline-block; margin-top: 8px;" class="gradient-text">Lim
+                        Guan You</span>
                 </div>
             </div>
-        </div>
-        <canvas id="confetti-canvas"></canvas>
-        <div class="quiz-container" id="quiz">
-            <h3>Biology Quiz Time!</h3>
-            <p>What is the powerhouse of the cell?</p>
-            <button onclick="checkAnswer('mitochondria')">Mitochondria</button>
-            <button onclick="checkAnswer('nucleus')">Nucleus</button>
-            <button onclick="checkAnswer('ribosome')">Ribosome</button>
-        </div>
-        <div class="surprise-page" id="surprise">
-            <h2>Surprise!</h2>
-            <p>Here’s a birthday treat for you, Mr. Fairil!</p>
-            <div class="cake-container">
-                <div class="cake">🎂</div>
-                <div class="cake">🎂</div>
-                <div class="cake">🎂</div>
+
+            <div class="interactive-section">
+                <button id="reveal-btn" class="apple-btn">
+                    <span>Analyze Specimen</span>
+                    <svg viewBox="0 0 24 24" fill="none" class="btn-icon">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
             </div>
-            <audio id="birthday-song" src="hbs.mp3" preload="auto"></audio>
+        </div>
+    </main>
+
+    <div class="hidden-overlay" id="surprise-overlay">
+        <div class="overlay-glass">
+            <h3 class="overlay-title" id="overlay-title">Initiating Analysis</h3>
+
+            <!-- Loading Phase -->
+            <div id="loading-phase">
+                <div class="dna-loader">
+                    <div class="strand"></div>
+                    <div class="strand"></div>
+                    <div class="strand"></div>
+                    <div class="strand"></div>
+                    <div class="strand"></div>
+                    <div class="strand"></div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="loading-text" id="loading-text">Extracting genetic material...</div>
+            </div>
+
+            <!-- Result Phase -->
+            <div id="result-phase" style="display: none;">
+                <div class="data-cards">
+                    <div class="data-card">
+                        <div class="data-label">Subject</div>
+                        <div class="data-value">Mr Fairil MD Samudi</div>
+                    </div>
+                    <div class="data-card">
+                        <div class="data-label">Awesomeness</div>
+                        <div class="data-value gradient-text">Beyond Limits</div>
+                    </div>
+                    <div class="data-card full-width">
+                        <div class="data-label">Impact on Students</div>
+                        <div class="data-value">Permanent Positive Mutation</div>
+                    </div>
+                </div>
+                <button id="close-btn" class="apple-close-btn">Complete Routine</button>
+            </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="script.js"></script>
 </body>
+
 </html>
