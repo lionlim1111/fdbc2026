@@ -1,95 +1,155 @@
-const card = document.getElementById('card');
-const quiz = document.getElementById('quiz');
-const surprise = document.getElementById('surprise');
-const canvas = document.getElementById('confetti-canvas');
-const ctx = canvas.getContext('2d');
-const birthdaySong = document.getElementById('birthday-song');
+document.addEventListener('DOMContentLoaded', () => {
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+    // Adding subtle 3D tilt effect on the card (Apple TV like)
+    const card = document.getElementById('main-card');
+    const container = document.querySelector('.card-container');
 
-let confetti = [];
-const confettiCount = 150;
+    if (card && container) {
+        container.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            // Calculate center of the card
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
 
-// Flip card on click and show quiz
-card.addEventListener('click', () => {
-    card.classList.toggle('flipped');
-    if (card.classList.contains('flipped')) {
-        startConfetti();
-        setTimeout(() => {
-            quiz.style.display = 'block';
-        }, 1000);
-    } else {
-        quiz.style.display = 'none';
-    }
-});
+            // Calculate distance from center (normalized from -1 to 1)
+            const mouseX = (e.clientX - centerX) / (rect.width / 2);
+            const mouseY = (e.clientY - centerY) / (rect.height / 2);
 
-// Confetti effect
-function randomInRange(min, max) {
-    return Math.random() * (max - min) + min;
-}
+            // subtle rotation (max 6 degrees)
+            const rotateX = mouseY * -6;
+            const rotateY = mouseX * 6;
 
-function createConfetti() {
-    for (let i = 0; i < confettiCount; i++) {
-        confetti.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height - canvas.height,
-            r: randomInRange(5, 15),
-            d: randomInRange(0.1, 0.5),
-            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-            tilt: randomInRange(-10, 10),
-            tiltAngle: 0,
-            shape: Math.random() > 0.5 ? 'circle' : 'square'
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(0) scale(1)`;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) scale(1)`;
+            card.style.transition = `transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)`;
+        });
+
+        container.addEventListener('mouseenter', () => {
+            card.style.transition = `transform 0.1s ease`;
         });
     }
-}
 
-function drawConfetti() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    confetti.forEach((c, i) => {
-        c.y += c.d;
-        c.tiltAngle += 0.1;
-        ctx.beginPath();
-        if (c.shape === 'circle') {
-            ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
-        } else {
-            ctx.rect(c.x - c.r, c.y - c.r, c.r * 2, c.r * 2);
-        }
-        ctx.fillStyle = c.color;
-        ctx.fill();
+    // Modal Interactions & Progressive Scan
+    const revealBtn = document.getElementById('reveal-btn');
+    const closeBtn = document.getElementById('close-btn');
+    const overlay = document.getElementById('surprise-overlay');
+    const bgAudio = document.getElementById('bg-audio');
 
-        if (c.y > canvas.height) confetti.splice(i, 1);
-    });
+    // Core Elements for the loading phase
+    const loadingPhase = document.getElementById('loading-phase');
+    const resultPhase = document.getElementById('result-phase');
+    const progressBar = document.getElementById('progress-bar');
+    const loadingText = document.getElementById('loading-text');
+    const overlayTitle = document.getElementById('overlay-title');
 
-    if (confetti.length > 0) requestAnimationFrame(drawConfetti);
-}
+    const loaderMessages = [
+        "Extracting genetic material...",
+        "Sequencing awesomeness DNA...",
+        "Analyzing teaching methodologies...",
+        "Calculating impact factor...",
+        "Finalizing results..."
+    ];
 
-function startConfetti() {
-    confetti = [];
-    createConfetti();
-    drawConfetti();
-}
+    if (revealBtn && overlay && closeBtn) {
+        revealBtn.addEventListener('click', () => {
+            // Unmute and play audio
+            if (bgAudio) {
+                bgAudio.volume = 0.5;
+                bgAudio.play().catch(e => console.log('Audio autoplay prevented by standard browser policy. It should play after interaction.', e));
+            }
 
-// Quiz logic with surprise page
-function checkAnswer(answer) {
-    if (answer === 'mitochondria') {
-        alert('Correct! 🎉 Mitochondria is the powerhouse of the cell!');
-        quiz.style.display = 'none';
-        card.style.display = 'none';
-        startConfetti();
-        setTimeout(() => {
-            surprise.style.display = 'flex';
-            birthdaySong.play().catch(() => {
-                console.log('Audio playback was blocked. User interaction may be required.');
-            });
-        }, 500);
-    } else {
-        alert('Oops! Try again.');
+            // Reset UI State
+            overlay.classList.add('active');
+            loadingPhase.style.display = 'block';
+            resultPhase.style.display = 'none';
+            progressBar.style.width = '0%';
+            overlayTitle.innerText = "Initiating Analysis";
+            loadingText.innerText = loaderMessages[0];
+
+            let progress = 0;
+            let messageIndex = 1;
+
+            // Start the scanning sequence
+            const scanInterval = setInterval(() => {
+                progress += 1;
+                progressBar.style.width = progress + '%';
+
+                // Update messages as progress hits certain milestones
+                if (progress % 20 === 0 && messageIndex < loaderMessages.length) {
+                    loadingText.innerText = loaderMessages[messageIndex];
+                    messageIndex++;
+                }
+
+                if (progress >= 100) {
+                    clearInterval(scanInterval);
+
+                    // Transition to results screen
+                    setTimeout(() => {
+                        loadingPhase.style.display = 'none';
+                        resultPhase.style.display = 'block';
+                        overlayTitle.innerText = "Analysis Complete";
+
+                        // Fire Confetti!
+                        if (window.confetti) {
+                            var duration = 3500;
+                            var end = Date.now() + duration;
+
+                            (function frame() {
+                                confetti({
+                                    particleCount: 5,
+                                    angle: 60,
+                                    spread: 55,
+                                    origin: { x: 0 },
+                                    colors: ['#32d74b', '#0a84ff', '#ffffff'] // Matching Apple palette
+                                });
+                                confetti({
+                                    particleCount: 5,
+                                    angle: 120,
+                                    spread: 55,
+                                    origin: { x: 1 },
+                                    colors: ['#32d74b', '#0a84ff', '#ffffff']
+                                });
+
+                                if (Date.now() < end) {
+                                    requestAnimationFrame(frame);
+                                }
+                            }());
+                        }
+
+                        // Animate data cards stagger in
+                        const cards = document.querySelectorAll('.data-card');
+                        cards.forEach((c, index) => {
+                            c.style.opacity = '0';
+                            c.style.transform = 'translateY(10px)';
+                            setTimeout(() => {
+                                c.style.transition = 'all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)';
+                                c.style.opacity = '1';
+                                c.style.transform = 'translateY(0)';
+                            }, 100 + (index * 150));
+                        });
+                    }, 500);
+                }
+            }, 60); // 60ms * 100 steps = 6 seconds of scanning awesomeness
+        });
+
+        closeBtn.addEventListener('click', () => {
+            overlay.classList.remove('active');
+            if (bgAudio) {
+                // Fade out audio gracefully
+                let fadeAudio = setInterval(() => {
+                    if (bgAudio.volume > 0.05) {
+                        bgAudio.volume -= 0.05;
+                    } else {
+                        bgAudio.pause();
+                        bgAudio.currentTime = 0;
+                        clearInterval(fadeAudio);
+                    }
+                }, 100);
+            }
+        });
     }
-}
 
-// Resize canvas if window size changes
-window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
 });
