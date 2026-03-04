@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // Adding subtle 3D tilt effect on the card (Apple TV like)
@@ -153,3 +154,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
